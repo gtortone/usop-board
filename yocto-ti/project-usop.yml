@@ -1,0 +1,61 @@
+header:
+  version: 18
+
+machine: usop
+
+distro: poky
+
+repos:
+
+  poky:
+    url: https://git.yoctoproject.org/git/poky
+    branch: scarthgap
+    layers:
+      meta:
+      meta-poky:
+
+  meta-openembedded:
+    url: git://git.openembedded.org/meta-openembedded
+    branch: scarthgap
+    layers:
+      meta-oe:
+      meta-networking:
+      meta-python:
+
+  meta-ti:
+    url: https://git.yoctoproject.org/meta-ti
+    branch: scarthgap
+    layers:
+      meta-beagle:
+      meta-ti-bsp:
+      meta-ti-extras:
+
+  meta-arm:
+    url: git://git.yoctoproject.org/meta-arm
+    branch: scarthgap
+    layers:
+      meta-arm:
+      meta-arm-toolchain:
+
+  meta-usop:
+    path: meta-usop
+
+local_conf_header:
+  meta-custom: |
+    PACKAGE_CLASSES ?= "package_ipk"
+    EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+    USER_CLASSES ?= "buildstats"
+    OE_TERMINAL = "screen"
+    PATCHRESOLVE = "noop"
+    CONF_VERSION = "2"
+    LICENSE_FLAGS_ACCEPTED += "commercial"
+    SYSVINIT_ENABLED_GETTYS = ""
+    INHERIT += "rm_work"
+    ENABLE_BINARY_LOCALE_GENERATION = "1"
+    GLIBC_SPLIT_LC_PACKAGES = "0"
+    GLIBC_GENERATE_LOCALES += "en_US.UTF-8"
+    IMAGE_LINGUAS += "en-us"
+
+target:
+  - core-image-minimal
+
