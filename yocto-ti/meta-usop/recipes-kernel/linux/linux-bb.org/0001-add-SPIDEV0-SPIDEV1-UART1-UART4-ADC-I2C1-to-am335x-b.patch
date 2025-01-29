@@ -1,0 +1,113 @@
+From 94830f5163467975ca726a19518ff18e0a2a14cd Mon Sep 17 00:00:00 2001
+From: Gennaro Tortone <gennaro.tortone@na.infn.it>
+Date: Mon, 20 Jan 2025 00:07:43 +0100
+Subject: [PATCH] add SPIDEV0,SPIDEV1,UART1,UART4,ADC,I2C1 to am335x-boneblack
+ dt
+
+---
+ arch/arm/boot/dts/ti/omap/BB-I2C1-00A0.dtso   | 60 +++++++++++++++++++
+ arch/arm/boot/dts/ti/omap/Makefile            |  4 ++
+ ...neblack.dts => am335x-boneblack-stock.dts} |  0
+ 3 files changed, 64 insertions(+)
+ create mode 100644 arch/arm/boot/dts/ti/omap/BB-I2C1-00A0.dtso
+ rename arch/arm/boot/dts/ti/omap/{am335x-boneblack.dts => am335x-boneblack-stock.dts} (100%)
+
+diff --git a/arch/arm/boot/dts/ti/omap/BB-I2C1-00A0.dtso b/arch/arm/boot/dts/ti/omap/BB-I2C1-00A0.dtso
+new file mode 100644
+index 000000000000..4656ab796979
+--- /dev/null
++++ b/arch/arm/boot/dts/ti/omap/BB-I2C1-00A0.dtso
+@@ -0,0 +1,60 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Copyright (C) 2019 Robert Nelson <robertcnelson@gmail.com>
++ */
++
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/pinctrl/am33xx.h>
++#include <dt-bindings/gpio/gpio.h>
++
++/*
++ * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
++ */
++&{/chosen} {
++	overlays {
++		BB-I2C1-00A0.kernel = __TIMESTAMP__;
++	};
++};
++
++/* change MDIO PHY reset to free AM335X_PIN_UART0_CTSN for I2C1 bus */
++&davinci_mdio_default {
++   pinctrl-single,pins = <
++      /* MDIO */
++      AM33XX_PADCONF(AM335X_PIN_MDIO, PIN_INPUT_PULLUP | SLEWCTRL_FAST, MUX_MODE0)
++      AM33XX_PADCONF(AM335X_PIN_MDC, PIN_OUTPUT_PULLUP, MUX_MODE0)
++      /* Added to support GPIO controlled PHY reset */
++      /* AM33XX_PADCONF(AM335X_PIN_USB0_DRVVBUS, PIN_OUTPUT_PULLUP, MUX_MODE1) */
++   >;
++};
++
++&davinci_mdio_sleep {
++   pinctrl-single,pins = <
++      /* MDIO reset value */
++      AM33XX_PADCONF(AM335X_PIN_MDIO, PIN_INPUT_PULLDOWN, MUX_MODE7)
++      AM33XX_PADCONF(AM335X_PIN_MDC, PIN_INPUT_PULLDOWN, MUX_MODE7)
++      /* Added to support GPIO controlled PHY reset */
++      /* AM33XX_PADCONF(AM335X_PIN_USB0_DRVVBUS, PIN_INPUT_PULLDOWN, MUX_MODE7) */
++   >;
++};
++
++&am33xx_pinmux {
++	bb_i2c1_pins: pinmux_bb_i2c1_pins {
++		pinctrl-single,pins = <
++			AM33XX_PADCONF(AM335X_PIN_UART0_CTSN, SLEWCTRL_SLOW | PIN_INPUT_PULLUP, MUX_MODE3) /* SDA */
++			AM33XX_PADCONF(AM335X_PIN_UART0_RTSN, SLEWCTRL_SLOW | PIN_INPUT_PULLUP, MUX_MODE3) /* SCL */
++		>;
++	};
++};
++
++&i2c1 {
++   status = "okay";
++   pinctrl-names = "default";
++   pinctrl-0 = <&bb_i2c1_pins>;
++
++   clock-frequency = <400000>;
++
++   #address-cells = <1>;
++   #size-cells = <0>;
++};
+diff --git a/arch/arm/boot/dts/ti/omap/Makefile b/arch/arm/boot/dts/ti/omap/Makefile
+index 4b781faabf70..1904bb11d88c 100644
+--- a/arch/arm/boot/dts/ti/omap/Makefile
++++ b/arch/arm/boot/dts/ti/omap/Makefile
+@@ -92,6 +92,7 @@ dtb-$(CONFIG_SOC_AM33XX) += \
+ 	am335x-base0033.dtb \
+ 	am335x-bone.dtb \
+ 	am335x-boneblack.dtb \
++	am335x-boneblack-stock.dtb \
+ 	am335x-boneblack-uboot.dtb \
+ 	PB-MIKROBUS-1.dtbo \
+ 	PB-MIKROBUS-0.dtbo \
+@@ -109,6 +110,7 @@ dtb-$(CONFIG_SOC_AM33XX) += \
+ 	BB-SPIDEV0-00A0.dtbo \
+ 	BB-NHDMI-TDA998x-00A0.dtbo \
+ 	BB-LCD-ADAFRUIT-24-SPI1-00A0.dtbo \
++	BB-I2C1-00A0.dtbo \
+ 	BB-I2C2-MPU6050.dtbo \
+ 	BB-I2C2-BME680.dtbo \
+ 	BB-I2C1-RTC-PCF8563.dtbo \
+@@ -167,6 +169,8 @@ dtb-$(CONFIG_SOC_AM43XX) += \
+ am57xx-evm-dtbs := am57xx-beagle-x15.dtb am57xx-evm.dtbo
+ am57xx-evm-reva3-dtbs := am57xx-beagle-x15-revc.dtb am57xx-evm.dtbo
+ 
++am335x-boneblack-dtbs := am335x-boneblack-stock.dtb BB-I2C1-00A0.dtbo BB-SPIDEV0-00A0.dtbo BB-SPIDEV1-00A0.dtbo BB-UART1-00A0.dtbo BB-UART4-00A0.dtbo BB-ADC-00A0.dtbo
++
+ dtb-$(CONFIG_SOC_DRA7XX) += \
+ 	am57xx-beagle-x15.dtb \
+ 	am57xx-beagle-x15-revb1.dtb \
+diff --git a/arch/arm/boot/dts/ti/omap/am335x-boneblack.dts b/arch/arm/boot/dts/ti/omap/am335x-boneblack-stock.dts
+similarity index 100%
+rename from arch/arm/boot/dts/ti/omap/am335x-boneblack.dts
+rename to arch/arm/boot/dts/ti/omap/am335x-boneblack-stock.dts
