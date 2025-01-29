@@ -21,7 +21,10 @@ IMAGE_INSTALL = "\
     libftdi \
     usbutils \
     mtd-utils \
+    util-linux-mkfs \
+    dosfstools \
     util-linux-sfdisk \
+    e2fsprogs \
     e2fsprogs-resize2fs \
     netcat \
     rsync \
