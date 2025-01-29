@@ -1,0 +1,9 @@
+autoload=no
+bootdev=mmc
+bootcmd=run boot${bootdev}
+bootemmc=setenv mmcdev 1;run bootmmc
+bootmmc=setenv bootargs console=ttyS0,115200 earlyprintk root=/dev/mmcblk1p1 rw rootwait;mmc rescan;ext4load mmc ${mmcdev}:1 0x88000000 /boot/am335x-boneblack.dtb;ext4load mmc ${mmcdev}:1 0x82000000 /boot/zImage;bootz 0x82000000 - 0x88000000
+bootnet=dhcp;setenv bootargs console=ttyS0,115200 root=/dev/ram0;tftp 0x88000000 ${tftpdir}/am335x-boneblack.dtb;tftp 0x82000000 ${tftpdir}/zImage;tftp 0x88080000 ${tftpdir}/rootfs.cpio.gz;bootz 0x82000000 0x88080000 0x88000000
+bootsd=setenv mmcdev 1;run bootmmc
+mmcdev=1
+tftpdir=usop
