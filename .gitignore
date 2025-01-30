@@ -6,3 +6,4 @@ yocto-ti/poky
 
 image-builder/images
 image-builder/tarballs
+image-builder/overlays/boot/*
