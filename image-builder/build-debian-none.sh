@@ -3,6 +3,7 @@
 YOCTO_PROJECT_BASE=/home/tortone/devel/Belle2/git/usop-board/yocto-ti/build/deploy-ti/images/usop
 
 echo "copy Linux kernel modules from Yocto image directory..."
+mkdir -p overlays/boot
 cp $YOCTO_PROJECT_BASE/modules-usop.tgz overlays/boot
 
 echo "copy U-Boot, zImage, device tree..."
