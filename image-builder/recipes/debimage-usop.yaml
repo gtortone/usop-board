@@ -1,0 +1,201 @@
+{{- $image := or .image "debian12.img" -}}
+{{- $postinstall := or .postinstall "none" -}}
+
+architecture: armhf
+
+actions:
+
+  - action: debootstrap
+    suite: "bookworm"
+    components:
+      - main
+    mirror: https://deb.debian.org/debian
+    variant: minbase
+
+  - action: run
+    chroot: true
+    command: echo usop > /etc/hostname
+
+  - action: apt
+    packages: 
+      - systemd-sysv
+      - systemd-timesyncd
+      - udhcpc
+      - bash-completion
+      - dbus
+      - telnet
+      - socat
+      - netcat-traditional
+      - iptables
+      - sudo
+      - openssh-server
+      - apt-utils
+      - dialog
+      - locales
+      - minicom
+      - picocom
+      - screen
+      - curl
+      - haveged
+      - fdisk
+      - udev 
+      - netbase 
+      - ifupdown 
+      - iputils-ping 
+      - wget 
+      - net-tools
+      - ntpdate
+      - nano
+      - less
+      - kmod 
+      - vim
+      - file
+      - parted
+      - git
+      - ca-certificates
+      - libftdi1
+      - libftdi1-dev
+      - man-db
+      - gcc 
+      - g++ 
+      - tcl
+      - python3
+      - python3-pip
+      - python3-dev
+      - libpython3-dev
+      - swig
+      - make 
+      - pkg-config 
+      - libusb-dev 
+      - cmake 
+      - zlib1g 
+      - zlib1g-dev 
+      - usbutils
+      - perl
+      - libpcre3
+      - libpcre3-dev
+      - supervisor
+      - collectd-core 
+      - collectd-dev 
+      - libyajl2
+      - python3-yaml
+      - python3-numpy
+
+  - action: unpack
+    file: tarballs/epics.tar.gz
+
+  - action: run
+    chroot: true
+    command: pip3 install --break-system-packages pyepics
+
+  - action: overlay
+    source: ../overlays/firstboot
+    destination: /
+
+  - action: overlay
+    source: ../overlays/supervisor
+    destination: /etc/supervisor
+
+  - action: overlay
+    source: ../overlays/modules
+    destination: /etc
+
+  - action: run
+    chroot: true
+    command: systemctl enable firstboot.service
+
+  - action: overlay
+    source: ../overlays/inittab
+    destination: /etc
+
+  - action: overlay
+    source: ../overlays/boot
+    destination: /boot
+
+  - action: overlay
+    source: ../overlays/sshd
+    destination: /etc/ssh
+
+  - action: overlay
+    source: ../overlays/bash/bashrc
+    destination: /root/.bashrc
+
+  - action: overlay
+    source: ../overlays/vim/vimrc
+    destination: /root/.vimrc
+
+  - action: overlay
+    source: ../overlays/network
+    destination: /etc/network/interfaces.d
+
+  - action: run
+    chroot: true
+    script: ../scripts/untar-modules.sh
+
+  - action: run
+    chroot: true
+    command: /usr/sbin/depmod -a 6.6.32-ti
+
+  - action: run
+    chroot: true
+    script: ../scripts/build-ltc2983-ioc.sh
+
+  - action: run
+    chroot: true
+    script: ../scripts/install-b2-eclmon.sh
+
+  - action: run
+    chroot: true
+    command: systemctl enable serial-getty@ttyS0.service
+
+  - action: run
+    chroot: true
+    command: systemctl enable serial-getty@ttyGS0.service
+
+  - action: run
+    chroot: true
+    command: echo "ttyS0" >> /etc/securetty
+
+  - action: run
+    chroot: true
+    command: echo "en_US.UTF-8 UTF-8" > /etc/locale.gen; /usr/sbin/locale-gen; /usr/sbin/update-locale LANG=en_US.UTF-8
+
+  - action: run
+    chroot: true
+    command: echo 'root:$1$TzpfaNEc$tjqCamkIJFUytJokydS8w.' | /usr/sbin/chpasswd -e
+
+  - action: image-partition
+    imagename: {{ $image }}
+    imagesize: 2GB
+    partitiontype: msdos
+    mountpoints:
+      - mountpoint: /
+        partition: rootfs
+    partitions:
+      - name: rootfs
+        fs: ext4
+        start: 5MB
+        end: 100%
+        flags: [ boot ]
+        features: ["^orphan_file"]
+
+  - action: raw
+    origin: filesystem
+    source: /boot/MLO
+    offset: 131072
+
+  - action: raw
+    origin: filesystem
+    source: /boot/u-boot.img
+    offset: 393216
+
+  - action: filesystem-deploy
+    description: Deploying filesystem onto image
+
+  - action: run
+    postprocess: true
+    command: gzip -f {{ $image }}
+
+  - action: pack
+    compression: none
+    file: images/usop-debian12-none.tar

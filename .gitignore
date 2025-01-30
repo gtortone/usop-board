@@ -4,3 +4,5 @@ yocto-ti/meta-openembedded
 yocto-ti/meta-ti
 yocto-ti/poky
 
+image-builder/images
+image-builder/tarballs
