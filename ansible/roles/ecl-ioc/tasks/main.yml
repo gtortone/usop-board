@@ -1,0 +1,66 @@
+---
+- name: Install supervisor
+  ansible.builtin.package:
+    name: supervisor
+    state: present
+
+- name: Setup GIT environment (user.name)
+  community.general.git_config:
+    name: user.name 
+    value: "Gennaro Tortone"
+
+- name: Setup GIT environment (user.email)
+  community.general.git_config:
+    name: user.email 
+    value: "gennaro.tortone@na.infn.it"
+
+- name: Setup GIT environment (core.editor)
+  community.general.git_config:
+    name: core.editor 
+    value: "vi"
+
+- name: GIT clone of LTC2983-ioc repository
+  ansible.builtin.git:
+    repo: https://github.com/gtortone/LTC2983-ioc.git 
+    dest: /opt/LTC2983-ioc 
+    update: no
+
+- name: Make LTC2983-ioc 
+  community.general.make:
+    chdir: /opt/LTC2983-ioc
+
+- name: Copy supervisord EPICS IOC startup scripts 
+  ansible.builtin.copy:
+    remote_src: true
+    src: /opt/LTC2983-ioc/supervisor/
+    dest: /etc/supervisor/conf.d
+
+- name: Setup first ECL IOC init file
+  ansible.builtin.blockinfile:
+    dest: /opt/LTC2983-ioc/iocBoot/iocLTC2983/ioc-spi01.cmd
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    insertafter: "## sectors name config"
+    state: present
+    block: |
+      epicsEnvSet("SNAME_A","{{sector_list[0]}}")
+      epicsEnvSet("SNAME_B","{{sector_list[1]}}")
+
+- name: Setup second ECL IOC init file
+  ansible.builtin.blockinfile:
+    dest: /opt/LTC2983-ioc/iocBoot/iocLTC2983/ioc-spi02.cmd
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    insertafter: "## sectors name config"
+    state: present
+    block: |
+      epicsEnvSet("SNAME_A","{{sector_list[2]}}")
+      epicsEnvSet("SNAME_B","{{sector_list[3]}}")
+
+- name: Reload supervisord
+  ansible.builtin.service:
+    name: supervisor.service
+    state: restarted
+
+- name: Set supervisord to start at boot time
+  ansible.builtin.service:
+    name: supervisor.service 
+    enabled: yes 

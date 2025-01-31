@@ -1,0 +1,31 @@
+# master Ansible playbook
+# =======================
+#
+# Prerequisites: 
+#
+#       - uSOP is running Linux Debian
+#       - 'root' user with no password
+#       - eth0 network interface up and running
+#       - Python package is installed
+#
+#       - on Ansible workstation /etc/ansible/hosts contains:
+#
+#usop ansible_ssh_host=10.1.1.76
+#
+# To run Ansible master playbook on a specified host:
+# ansible-playbook -e hosts=usop site.yml
+#
+# To run only a specified role (with tag):
+# ansible-playbook -e hosts=usop --tags=ecl-ioc site.yml
+
+---
+- name: Setup uSOP, install EPICS and B2 ECL monitoring IOC
+  hosts: "{{ ansible_limit | default(omit) }}"
+  remote_user: root
+
+  roles:
+    - { role: common, tags: [ 'common' ] }
+    - { role: epics, tags: [ 'epics' ] }
+    - { role: ecl-ioc, tags: [ 'ecl-ioc' ] }
+    - { role: ecl-mon, tags: [ 'ecl-mon' ] }
+

@@ -1,0 +1,113 @@
+gem_house:
+
+  vars:
+    ansible_python_interpreter: auto_legacy_silent
+    tz: Europe/Rome
+    dns:
+      - 10.1.1.254
+    domain: gmh
+    ntp: 10.1.1.254
+    fallback_ntp:
+      - 0.it.pool.ntp.org
+      - 1.europe.pool.ntp.org
+      - 0.europe.pool.ntp.org
+    collectors:
+      - {id: "gem-house", url: "https://10.1.3.3:8000/put/", user: "admin", pass: "4dm1n"}
+
+  hosts:
+
+    usop:
+      ansible_host: 10.1.1.37
+      ecl_ioc_type: forward
+      ecl_ioc_sec_prefix: S
+      sector_list: [ "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 1}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 2}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 3}}{{ecl_ioc_sec_suffix}}" ]
+      ecl_ioc_first_sector: 1
+      ecl_ioc_sec_suffix: F
+    mpmt:
+      ansible_python_interpreter: auto_legacy_silent
+      ansible_host: 10.1.1.34
+
+###########################################################################
+
+kek_b2:
+
+  vars:
+    ansible_python_interpreter: auto_legacy_silent
+    tz: "Asia/Tokyo"
+    dns:
+      - 172.22.48.4
+    domain: "b2epics.kek.jp"
+    ntp:
+      - 172.22.48.4
+    proxy: http://172.22.48.7:8080
+    no_proxy: usopmon01.b2epics.kek.jp
+    collectors:
+      - {id: "infn", url: "https://b2ecl.na.infn.it:8800/put/", user: "admin", pass: "4dm1n"}
+      - {id: "kek", url: "https://usopmon01.b2epics.kek.jp:8800/put/", user: "admin", pass: "4dm1n"}
+    ecl_ioc_sec_prefix: S
+    sector_list: [ "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 1}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 2}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 3}}{{ecl_ioc_sec_suffix}}" ]
+
+  hosts:
+
+    usopfw01:
+      ansible_host: 172.22.49.56
+      # specify if IOC runs for forward or backward ECL
+      ecl_ioc_type: forward
+      # ECL IOC sector name prefix
+      # first sector of IOC 
+      # usually each uSOP board runs 2 IOCs:
+      # e.g.
+      # IOC #1:	sector  1F - 2F
+      # IOC #2:	sector  3F - 4F
+      # then ecl_ioc_first_sector is 1
+      ecl_ioc_first_sector: 1
+      # ECL IOC sector name suffix
+      ecl_ioc_sec_suffix: F
+
+    usopfw02:
+      ansible_host: 172.22.49.57
+      ecl_ioc_type: forward
+      ecl_ioc_first_sector: 5
+      ecl_ioc_sec_suffix: F
+
+    usopfw03:
+      ansible_host: 172.22.49.58
+      ecl_ioc_type: forward
+      ecl_ioc_first_sector: 9
+      ecl_ioc_sec_suffix: F
+
+    usopfw04:
+      ansible_host: 172.22.49.59
+      ecl_ioc_type: forward
+      ecl_ioc_first_sector: 13
+      ecl_ioc_sec_suffix: F
+
+    usopbw01:
+      ansible_host: 172.22.49.60
+      ecl_ioc_type: backward
+      ecl_ioc_first_sector: 1
+      ecl_ioc_sec_suffix: B
+  
+    usopbw02:
+      ansible_host: 172.22.49.61
+      ecl_ioc_type: backward
+      ecl_ioc_first_sector: 5
+      ecl_ioc_sec_suffix: B
+  
+    usopbw03:
+      ansible_host: 172.22.49.62
+      ecl_ioc_type: backward
+      ecl_ioc_first_sector: 9
+      ecl_ioc_sec_suffix: B
+  
+    usopbw04:
+      ansible_host: 172.22.49.63
+      ecl_ioc_type: backward
+      ecl_ioc_first_sector: 13
+      ecl_ioc_sec_suffix: B
+  
+
+###########################################################################
+
+
+

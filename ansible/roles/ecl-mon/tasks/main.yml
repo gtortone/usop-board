@@ -1,0 +1,73 @@
+---
+- name: Install required packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - python3
+    - python3-pip
+    - python3-yaml
+    - python3-numpy
+    - collectd-core
+    - collectd-dev
+    - libyajl2
+
+- name: Install PyEpics library
+  ansible.builtin.pip:
+    name: pyepics
+    state: present
+    break_system_packages: true
+
+- name: Configure collectd with collector URL(s)
+  ansible.builtin.template:
+    src: collectd.j2 
+    dest: /etc/collectd/collectd.conf
+
+- name: Configure collectd default vars
+  ansible.builtin.template:
+    src: collectd.default.j2 
+    dest: /etc/default/collectd
+
+- name: Enable logging of collectd (1/2)
+  ansible.builtin.file:
+    path: /var/log/collectd.log
+    state: touch
+    mode: 0644
+
+- name: Enable logging of collectd (2/2)
+  ansible.builtin.copy:
+    src: collectd.logrotate
+    dest: /etc/logrotate.d/collectd 
+
+- name: GIT clone of b2-eclmon repository
+  ansible.builtin.git:
+    repo: https://github.com/gtortone/b2-eclmon.git
+    dest: /opt/b2-eclmon
+    update: no
+
+- name: Create symlink /opt/collectd-plugins
+  ansible.builtin.file:
+    src: /opt/b2-eclmon/client/src
+    dest: /opt/collectd-plugins
+    state: link
+
+- name: Configure collectd Belle2 ECL monitor plugin
+  ansible.builtin.template:
+    src: b2-ecl-sec.j2
+    dest: /opt/collectd-plugins/b2-ecl-sec.yaml
+
+- name: Setup /etc/bash.bashrc with PyEpics environment
+  ansible.builtin.template:
+    src: pyepics.j2 
+    dest: /root/.bash.conf.d/pyepics.sh
+
+- name: Restart collectd
+  ansible.builtin.service:
+    name: collectd.service
+    state: restarted
+
+- name: Set collectd to start at boot time
+  ansible.builtin.service:
+    name: collectd.service 
+    enabled: yes 
+

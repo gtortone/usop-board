@@ -1,0 +1,25 @@
+---
+- name: Install EPICS compiled tarball (skip if /opt/epics exists)
+  ansible.builtin.unarchive:
+    src: ../image-builder/tarballs/epics.tar.gz
+    dest: / 
+    owner: root 
+    group: root 
+    creates: /opt/epics
+
+- name: Setup /etc/bash.bashrc with EPICS environment variables
+  ansible.builtin.template:
+    src: epics.j2 
+    dest: /root/.bash.conf.d/epics.sh
+
+- name: Setup EPICS libraries
+  ansible.builtin.copy:
+    src: epics.conf 
+    dest: /etc/ld.so.conf.d/epics.conf
+    owner: root 
+    group: root 
+    mode: 0644
+
+- name: Run ldconfig
+  ansible.builtin.command:
+    cmd: /sbin/ldconfig

@@ -1,0 +1,63 @@
+---
+- name: Set hostname to {{ inventory_hostname }}
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Set /etc/hosts with {{ inventory_hostname }}
+  ansible.builtin.template:
+    src: hosts.j2 
+    dest: /etc/hosts
+
+- name: Set /etc/resolv.conf 
+  ansible.builtin.template:
+    src: resolv.j2 
+    dest: /etc/resolv.conf 
+    
+- name: Set and generate en_US.UTF-8 locale
+  community.general.locale_gen:
+    name: en_US.UTF-8 
+    state: present
+
+- name: Configure locale to en_US.UTF-8 and language to en_US.UTF-8
+  ansible.builtin.command:
+    cmd: localectl set-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+
+- name: Set timezone to {{ tz }}
+  community.general.timezone:
+    name: "{{ tz }}"
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: yes
+    
+- name: Configure timesyncd service
+  ansible.builtin.template:
+    src: timesyncd.j2 
+    dest: /etc/systemd/timesyncd.conf
+
+## generate password with 'mkpasswd --method=sha-512'
+- name: Set a new password for root user
+  ansible.builtin.user:
+    name: root 
+    shell: /bin/bash 
+    password: "$6$mGU93au5qOmg/V1$ifhMh6I01MUkebWdxDOMLwemI0rXzs9Earw.N7QCW6qsb0/MWBze0VtPMzunnh6CJo2CcxtKTMXdzFU0gaRH7/"
+    
+- name: Create bash config directory
+  ansible.builtin.file:
+    path: /root/.bash.conf.d
+    state: directory
+    
+- name: Copy .bashrc for root user
+  ansible.builtin.copy:
+    src: dot.bashrc 
+    dest: /root/.bashrc
+    
+- name: Set http proxy environment variables for apt and git
+  ansible.builtin.template: 
+    src: proxy.j2 
+    dest: /root/.bash.conf.d/proxy.sh
+    
+- name: Set /etc/motd
+  ansible.builtin.copy:
+    src: motd
+    dest: /etc/motd

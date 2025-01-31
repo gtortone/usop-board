@@ -1,0 +1,30 @@
+# YAML document for B2-ECL sector and PV mapping
+# syntax:
+# pvname: EPICS PV name (e.g. S1F:TEMP:TEMP01)
+#   id: {1 | 2 | 3} for temperature, 1 for humidity
+#   sector: sector number
+#   measure: "temperature" | "humidity"
+#
+{% for item in sector_list %}
+
+"{{item}}:TEMP:TEMP01":
+   id: 1
+   sector: {{item}}
+   measure: temperature
+   round: 2
+"{{item}}:TEMP:TEMP02":
+   id: 2
+   sector: {{item}}
+   measure: temperature
+   round: 2
+"{{item}}:TEMP:TEMP03":
+   id: 3
+   sector: {{item}}
+   measure: temperature
+   round: 2
+"{{item}}:RH":
+   id: 1
+   sector: {{item}}
+   measure: humidity
+   round: 1
+{% endfor %}
