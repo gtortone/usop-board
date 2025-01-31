@@ -75,26 +75,11 @@ actions:
       - libpcre3
       - libpcre3-dev
       - supervisor
-      - collectd-core 
-      - collectd-dev 
-      - libyajl2
-      - python3-yaml
-      - python3-numpy
-
-  - action: unpack
-    file: tarballs/epics.tar.gz
-
-  - action: run
-    chroot: true
-    command: pip3 install --break-system-packages pyepics
+      - bind9-dnsutils
 
   - action: overlay
     source: ../overlays/firstboot
     destination: /
-
-  - action: overlay
-    source: ../overlays/supervisor
-    destination: /etc/supervisor
 
   - action: overlay
     source: ../overlays/modules
@@ -117,10 +102,6 @@ actions:
     destination: /etc/ssh
 
   - action: overlay
-    source: ../overlays/bash/bashrc
-    destination: /root/.bashrc
-
-  - action: overlay
     source: ../overlays/vim/vimrc
     destination: /root/.vimrc
 
@@ -135,14 +116,6 @@ actions:
   - action: run
     chroot: true
     command: /usr/sbin/depmod -a 6.6.32-ti
-
-  - action: run
-    chroot: true
-    script: ../scripts/build-ltc2983-ioc.sh
-
-  - action: run
-    chroot: true
-    script: ../scripts/install-b2-eclmon.sh
 
   - action: run
     chroot: true
