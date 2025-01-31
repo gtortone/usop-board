@@ -41,7 +41,7 @@
 
 - name: GIT clone of b2-eclmon repository
   ansible.builtin.git:
-    repo: https://github.com/gtortone/b2-eclmon.git
+    repo: "{{ git_url }}/b2-eclmon.git"
     dest: /opt/b2-eclmon
     update: no
 

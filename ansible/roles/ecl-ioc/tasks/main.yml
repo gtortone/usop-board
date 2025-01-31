@@ -21,7 +21,7 @@
 
 - name: GIT clone of LTC2983-ioc repository
   ansible.builtin.git:
-    repo: https://github.com/gtortone/LTC2983-ioc.git 
+    repo: "{{ git_url }}/LTC2983-ioc.git"
     dest: /opt/LTC2983-ioc 
     update: no
 
