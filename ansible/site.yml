@@ -23,6 +23,9 @@
   hosts: "{{ ansible_limit | default(omit) }}"
   remote_user: root
 
+  environment:
+    http_proxy: "{{ proxy | default(omit) }}"
+
   roles:
     - { role: common, tags: [ 'common' ] }
     - { role: epics, tags: [ 'epics' ] }
