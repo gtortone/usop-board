@@ -35,8 +35,7 @@ kek_b2:
     dns:
       - 172.22.48.4
     domain: "b2epics.kek.jp"
-    ntp:
-      - 172.22.48.4
+    ntp: 172.22.48.4
     fallback_ntp:
       - 0.asia.pool.ntp.org
       - 1.asia.pool.ntp.org
@@ -46,7 +45,7 @@ kek_b2:
     no_proxy: usopmon01.b2epics.kek.jp
     collectors:
       - {id: "infn", url: "https://b2ecl.na.infn.it:8800/put/", user: "admin", pass: "4dm1n"}
-      - {id: "kek", url: "https://usopmon01.b2epics.kek.jp:8800/put/", user: "admin", pass: "4dm1n"}
+      #- {id: "kek", url: "https://usopmon01.b2epics.kek.jp:8800/put/", user: "admin", pass: "4dm1n"}
     ecl_ioc_sec_prefix: S
     sector_list: [ "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 1}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 2}}{{ecl_ioc_sec_suffix}}", "{{ecl_ioc_sec_prefix}}{{ecl_ioc_first_sector | int + 3}}{{ecl_ioc_sec_suffix}}" ]
     git_url: https://gitlab.desy.de/gennaro.tortone
